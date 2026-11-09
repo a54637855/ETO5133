@@ -40,6 +40,7 @@ str(data4)
 
 
 ```{r variables, echo=FALSE }
+library(kableExtra)
 table<-data.frame(Variable=c("Group","Year","Other Fruits","Apples,Bananas and Oranges","Citrus Fruits"),Description=c("Geographic Group","Year, 1973-2023","Other fruits not listed, excluding Dates,Pineapples,Plantains and Grapes","Apples, Bananas and Oranges","Citrus, including Grapefruits, Lemons, Limes and other citrus fruits"))
 kable(table,caption="Description of Variables used")
 
@@ -50,6 +51,10 @@ summary_data2<-data4 %>%group_by(Group) %>%summarise(Mean_Amount=mean(Citrus_Fru
 kable(summary_data,caption = "Mean and Sum of Apples, Bananas and Oranges")
 kable(summary_data1,caption = "Mean and Sum of Other Fruit")
 kable(summary_data2,caption = "Mean and Sum of Citrus Fruits")
+
+table_data<-data4 %>% mutate(Decades=cut(Year,breaks=seq(1970,2030,by=10),dig.lab=4,right=FALSE))%>%group_by(Decades,Group) %>%summarise(Average=mean(Apples_Bananas_Oranges,na.rm=TRUE,.groups='drop'))%>%pivot_wider(names_from=Group,values_from=Average)
+
+kable(table_data,caption="Comparison of Fruit Consumption over Time",digits=2) %>% footnote(general= "Note: The dataset only inlcudes data up to and including 2023.")
 ```
 ### Summary Statistics
 
