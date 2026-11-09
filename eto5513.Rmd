@@ -58,9 +58,11 @@ The summary statistics above highlight that the fruit group of Apples,Oranges an
 ```{r pressure, echo=FALSE}
 
 ggplot(data=data4,aes(x=Apples_Bananas_Oranges,y=Citrus_Fruits,color=Group))+geom_point(size=2)+theme_minimal()+labs(title="Relationship between Apples,Bananas and Oranges and Citrus Fruits")
+ggplot(data=data4,aes(x=Other.fruits,y=Citrus_Fruits,color=Group))+geom_point(size=2)+theme_minimal()+labs(title="Relationship between Apples,Bananas and Oranges and Citrus Fruits")
+
 ```
 
-The plot above highlights a relatively strong positive relationship between Apples,Bananas, Oranges and Citrus Fruits, with North America having the highest amount of both fruit groups. *Most geographic groups had a proportionate amount of both fruit groups, with the exception of Africa (who had higher levels of citrus fruit) and Oceania (who had higher levels of Apples, Bananas and Oranges)* 
+The first plot above highlights a relatively strong positive relationship between Apples,Bananas, Oranges and Citrus Fruits, with North America having the highest amount of both fruit groups. *Most geographic groups had a proportionate amount of both fruit groups, with the exception of Africa (who had higher levels of citrus fruit) and Oceania (who had higher levels of Apples, Bananas and Oranges)* 
 
 ### Conclusion
 
