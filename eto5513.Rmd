@@ -1,5 +1,5 @@
 ---
-title: "ETO5513 Assignment1"
+title: "Assignment1"
 output: html_document
 date: "2026-11-06"
 ---
@@ -9,7 +9,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(knitr)
 library(ggplot2)
-data0<-read.csv("fruit-consumption-by-fruit-type.csv")
+data0<-read.csv("Data/fruit-consumption-by-fruit-type.csv")
 data1<- data0 %>% mutate (Citrus_Fruits=Grapefruit+Citrus..other+Lemons.and.limes,Apples_Bananas_Oranges=Apples+Oranges+Bananas)
 
 data2<-data1 %>% select (-Dates, -Grapefruit,-Citrus..other,-Lemons.and.limes,-Pineapples,-Plantains,-Grapes,-Apples,-Bananas,-Oranges,-Code)
@@ -18,14 +18,14 @@ data4<-data3%>%filter(Group!="World")
 
 ```
 
-## Research Question 
-### How does fruit consumption differ globally?
+## Research Question- How does fruit consumption differ globally?
+
 
 The purpose of this analysis is to examine the differences in fruit consumption globally across the time period of the last 50 years. Specifically, the consumption of different groups of fruit will be analysed in relation to different geographic groups, across continents and different income levels. 
 
 ## Data
 
-The dataset used in this analysis is from Our World in Data, with original data from FAOSTAT (Food and Agriculture Organization of the United Nations) . The raw data contained 561 rows, with 14 variables. To reduce the dataset to the size specified for this analysis (at least 3 numerical variables and no more than 5 overall), similar fruits were grouped and the remaining columns were dropped. 
+The dataset used in this analysis is from Our World in Data, with original data from FAOSTAT (Food and Agriculture Organization of the United Nations)(Food and Agriculture Organization of the United Nations,n.d). The raw data contained 561 rows, with 14 variables. To reduce the dataset to the size specified for this analysis (at least 3 numerical variables and no more than 5 overall), similar fruits were grouped and the remaining columns were dropped. 
 
 ### Variables
 
@@ -56,7 +56,7 @@ table_data<-data4 %>% mutate(Decades=cut(Year,breaks=seq(1970,2030,by=10),dig.la
 
 kable(table_data,caption="Comparison of Fruit (Apples, Bananas and Oranges) Consumption over Time",digits=2) %>% footnote(general= "The dataset only includes data up to and including 2023.")
 ```
-### Summary Statistics
+### Analysis of Data
 
 The summary statistics above highlight that the fruit group of Apples,Oranges and Bananas had the highest mean and sum, with Citrus fruits having the lowest, significantly less than the other groups analysed.**Generally, North America had the highest amounts of fruit consumption (First globally among Apples,Bananas Oranges and Citrus fruit,and second overall in Other Fruits), whilst Africa and Asia tended to have the lowest (with the exception of Citrus Fruits in Africa).** 
 
