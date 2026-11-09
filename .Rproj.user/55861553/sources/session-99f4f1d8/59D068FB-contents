@@ -1,4 +1,0 @@
-Percentage of Population using safe drinking water
-```{include=FALSE}
-ggplot(water12,aes(x=year,y=percentage_of_population,color=country))+geom_line()+facet_wrap(~geographic_area)
-```
