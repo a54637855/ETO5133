@@ -1,0 +1,169 @@
+---
+title: "Assessment 2, Ayshani Vallabh"
+output: html_document
+date: "2026-02-13"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,fig.width=9)
+```
+
+
+
+```{r data setup,include=FALSE}
+library(tidyverse)
+library(knitr)
+library(readr)
+library(dplyr)
+water1<- read_csv("1548EA3_ALL_LATEST.csv")
+water2<-rename(water1,country=GEO_NAME_SHORT,year=DIM_TIME,geographic_area=DIM_DEG_URB,percentage_of_population=PERCENT_POP_N) #renaming variables
+water3<-select(water2,year,country,geographic_area,percentage_of_population)
+water13<-filter(water3,(country %in% c("Africa","Americas","Europe","Western Pacific","South-East Asia","Eastern Mediterranean")))
+library(naniar)
+water14<-filter(water3,!(country %in% c("Africa","Americas","Europe","Western Pacific","Eastern Mediterranean","South-East Asia","World")))
+water15<-filter(water14,!(geographic_area %in% c("TOTAL")))
+```
+
+This analysis builds on that of Assessment 1 by incorporating more in-depth research questions, additional data and the use of linear regression modelling. Using the same dataset from World Health Organisation (WHO) on use of safe drinking water (WHO 2026), new research questions have been formulated by adding additional geographic variables. 
+
+Public data on the proportion of population with a hand washing facility will also be used from the WHO (WHO 2026). This has been selected as hand washing is a key part of hygiene and is a topic that is also monitored by WHO and UNICEF Joint Monitoring Programme for Water Supply, Sanitation and Hygiene (JMP), alongside use of safe drinking water (WHO 2026). 
+
+### Research Question 1: How does use of safe drinking water differ by geographic group? 
+
+In the previous assessment, all geographic groups present in the raw data were removed with the exception of "World". To provide greater insight for the purposes of this analysis, a new storage box was created that instead contained values of percentage of population and urban or rural classification for these groups only. Upon initial inspection, some missing values appeared to be present. Using the `vis_miss` function, an overview of the values that would not be present in the resulting plot was obtained.
+
+
+```{R plots, echo=FALSE, warning=FALSE, messages=FALSE,fig.width=9,fig.height=5}
+library(visdat)
+vis_miss(water13,sort_miss=TRUE)+labs(title="Missing Values",subtitle="Geographic Groups in Percentage of Population Using Safe Drinking Water")
+```
+
+As the amount of missing data was relatively small, these would be omitted and a line graph was created to visualise the relationship between the four variables. As the x axis measured time, a line graph was considered to be the most appropriate choice, as it connected data points and provided easier interpretation of trends. To incorporate geographic group as an additional variable, facet wrap was used. To provide some representation of the missing values, the `naniar` package was used, with missing values shown as points, rather than lines on the graph.  The `viridis` colour palette has also been used to ensure the graph is colourblind friendly.
+The results highlight that, with the exception of South East Asia, all urban areas had consistently higher levels of usage of safe drinking water than across rural or total areas. Despite this, all rural areas displayed an increase in usage across the study time period, with all groups with the exception of Americas showing a relatively flat, moderate upward sloping trend. Across all three classifications(rural, urban, total), Europe demonstrated the highest percentages of population using safe drinking water. 
+```{R plots7, echo=FALSE, warning=FALSE, messages=FALSE}
+ggplot(water13,mapping=aes(x=year,y=percentage_of_population,col=geographic_area))+geom_line(size=1)+facet_wrap(~country)+geom_miss_point(size=0.5)+scale_colour_viridis_d()+labs(title="Percentage of Population Using Safe Drinking Water",subtitle = "Geographic Groups")
+
+```
+
+### Research Question 2: How does geographic area affect the availability of safe drinking water? 
+
+Ahead of running linear regression, a initial count of values across rural and urban areas was undertaken. As only a single variable of percentage of population was being measured, a histogram with a facet wrap was used. This enabled both rural and urban values to be compared side by side, with the y axis measuring the count of the times that each value was present. To assist with interpretation, a density curve was added to clearly demonstrate the overall trend.
+```{R plots2, echo=FALSE, warning=FALSE, messages=FALSE}
+
+ggplot(water15,aes(x=percentage_of_population,y=after_stat(count)))+geom_histogram(bins=80,boundary=0)+facet_wrap(~geographic_area)+geom_density(color="yellow",linewidth=1.4)+labs(title="Percentage of Population Using Safe Drinking Water",subtitle = "Rural and Urban Areas" )
+```
+
+Initial results highlight a downwards trend amongst rural areas, with an upwards curve across urban areas. After assessing the results from the first research question above, these trends are expected, as rural areas consistently displayed lower percentages than urban areas. 
+
+Next, the linear regression model was run, using percentage of population as the y variable. As this variable was numeric in nature, this model was selected over the linear probability model, which is better suited to categorical y variables instead.
+To prepare the data, the existing geographic_area column was separated to create categorical variables with values of 0 or 1.For example, rural areas were classified in the new column 'rural_area', with rural areas returning a value of 1 and urban areas as 0. 
+
+Following this, training and test sections were created (separated as a 60:40 ratio), before running the model. Initially, rural area was used as a predictor alone, with urban being used next. 
+```{R plots9, echo=FALSE, warning=FALSE, messages=FALSE}
+ water16<-mutate(water3,rural=geographic_area=="RURAL")
+water16$rural_area<-ifelse(water16$rural==TRUE,"1","0")
+water16$urban_area<-ifelse(water16$rural==FALSE,"1","0")
+water17<-filter(water16,!(geographic_area %in% c("TOTAL")))
+ water18<-filter(water17,!(country %in% c("World","Africa","Americas","South-East Asia","Europe","Eastern Mediterranean","Western Pacific")))
+set.seed(1)
+train.index<-sample(dim(water18)[1],dim(water18)[1]*0.6)
+train.df<-water18[train.index,]
+test.df<-water18[-train.index,]
+model1<-lm(percentage_of_population~rural_area,data=train.df)
+summary(model1)
+model2<-lm(percentage_of_population~urban_area,data=train.df)
+summary(model2)
+```
+The model suggests that a rural area has a negative relationship, with the percentage of population using safe drinking water estimated to be 39.15% (Intercept of 65.1933 + Rural_area coefficient of -26.0395). On the other hand, urban areas showed a positive relationship, with percentage of population estimated to be 65.19% (Intercept of 39.1538 + urban_area coefficient of 26.0395).
+
+Summary statistics suggest that a significant relationship is present, as p values are less than 0.05. To evaluate the predictive power of the models, the y variable was removed and the `predict` function was used to derive the difference between actual and predicted values. The resulting values were then represented using a histogram.As the difference in values was the only variable being measured, this plot was considered to be appropriate. As the x variable  was of categorical nature, it is worth noting that some summary statistics(such as p value and r squared)and the differences in values from testing the models are the same.
+
+
+```{R plots11, echo=FALSE, warning=FALSE, messages=FALSE}
+ test.df_1<-test.df %>% select(-'percentage_of_population')
+model1_prediction<-predict(model1,test.df_1)
+difference.values1<-test.df$percentage_of_population-model1_prediction
+difference.data1<-data.frame("Predicted"=model1_prediction,"Actual"=test.df$percentage_of_population,"Difference=difference.values1")
+ggplot(difference.data1,aes(x=difference.values1))+geom_histogram(boundary=0,bins=150)+labs(title="Difference between Actual and Predicted Values",subtitle="Percentage of Population Using Safe Drinking Water- Rural Areas" )+xlab("Difference Value")
+test.df_2<-test.df %>% select(-'percentage_of_population')
+model2_prediction<-predict(model2,test.df_2)
+difference.values2<-test.df$percentage_of_population-model2_prediction
+difference.data2<-data.frame("Predicted"=model2_prediction,"Actual"=test.df$percentage_of_population,"Difference=difference.values2")
+ggplot(difference.data2,aes(x=difference.values2))+geom_histogram(boundary=0,bins=150)+labs(title="Difference between Actual and Predicted Values",subtitle="Percentage of Population Using Safe Drinking Water- Urban Areas")+xlab("Difference Value")
+```
+Specifically, predicted values from the model differ by up to 60 from actual values. However, most differences tended to be between 0 and 40. Given that the model only takes geographic area, the high error rate can be attributed to the fact that the model expects all values to essentially either be either 39.15 or 65.19. Although actual rural values are generally lower than urban areas as predicted, actual values in reality vary widely, rather than only being 39.15 or 65.19.
+
+### Research Question 3: How does the proportion of population with access to safe drinking water impact the proportion of population using a hand-washing facility? 
+
+To prepare data for analysis, the new dataset was filtered, existing variables were renamed and new categorical variables 'rural_area' and 'urban_area' were created as described for the previous research question. After merging the datasets, several missing values were present. 
+
+```{R plots3, include=FALSE}
+water20<-read_csv("D1223E8_ALL_LATEST.csv")
+water21<-rename(water20,country=GEO_NAME_SHORT,geographic_area=DIM_DEG_URB,year=DIM_TIME_TYPE,percentage_of_population_handwash=PERCENT_POP_N)
+water21<-rename(water20,country=GEO_NAME_SHORT,geographic_area=DIM_DEG_URB,year=DIM_TIME,percentage_of_population_handwash=PERCENT_POP_N)
+water22<-select(water21,year,country,geographic_area,percentage_of_population_handwash)
+water27<-mutate(water22,rural=geographic_area=="RURAL")
+water27$rural_area<-ifelse(water27$rural==TRUE,"1","0")
+water27$urban_area<-ifelse(water27$rural==FALSE,"1","0")
+water28<-filter(water27,!(geographic_area %in% c("TOTAL")))
+water29<-filter(water28,!(country %in% c("World")))
+water30<-filter(water29,!(country %in% c("Western Pacific")))
+water33<-full_join(water22,water3)
+water34<-filter(water33,!(country %in% c("World","Africa","Americas","South-East Asia","Europe","Eastern Mediterranean","Western Pacific")))
+library(tidyr)
+water35<-water34 %>% drop_na()
+set.seed(3)
+train.index5<-sample(dim(water35)[1],dim(water35)[1]*0.6)
+train.df5<-water35[train.index5,]
+test.df5<-water35[-train.index5,]
+model6<-lm(percentage_of_population_handwash~percentage_of_population,data=train.df5)
+summary(model6)
+test.df_5<-test.df5%>%select(-"percentage_of_population_handwash")
+model6_prediction<-predict(model6,test.df_5)
+difference.values5<-test.df5$percentage_of_population_handwash-model6_prediction
+difference.data5<-data.frame("Predicted"=model6_prediction,"Actual"=test.df5$percentage_of_population_handwash,"Difference"=difference.values5)
+```
+```{R plots4, echo=FALSE, warning=FALSE, messages=FALSE}
+vis_miss(water34,sort_miss=TRUE)+labs(title="Missing Values",subtitle="Percentage of Population Using Safe Drinking Water and With a Hand-Washing Facility")
+```
+
+As missing values accounted for 13% (largely due to differences from raw data on safe drinking water having more rows than the raw data on hand washing), these values were excluded. 
+```{R plots20, echo=FALSE, warning=FALSE, messages=FALSE}
+ggplot(water30,aes(x=percentage_of_population_handwash,y=after_stat(count)))+geom_histogram(bins=80,boundary=0)+geom_density(color="yellow",linewidth=1.5)+facet_wrap(~geographic_area)+labs(title="Percentage of Population with Hand-Washing Facilities",subtitle="Urban and Rural Areas" )+xlab("Percentage of Population with Hand-Washing Facility")
+
+```
+
+The plot above highlights a relationship that is similar to that described above with usage of safe drinking water. Rural areas tended to have lower rates of hand washing, with the opposite being true for urban areas. To determine the initial relationship between use of safe drinking water and hand-washing, a scatter plot was created with a density curve. This plot was chosen as both variables of interest are numeric and continuous.
+```{R plots15, echo=FALSE, warning=FALSE, messages=FALSE}
+ggplot(water35,aes(x=percentage_of_population,y=percentage_of_population_handwash))+geom_point(size=1, boundary=0)+geom_smooth()+labs(title="Percentage of Population with Hand-Washing Facilities and Using Safe Drinking Water")+scale_colour_viridis_c(option="viridis")+ylab("Percentage of Population with Hand-Washing Facility")+xlab("Percentage of Population Using Safe Drinking Water")
+```
+
+The plot highlights a strong upwards sloping curve, where having a hand washing facility present increases as the usage of safe drinking water does. This is somewhat expected, as both topics are related, and are both key initiatives that are monitored by the JMP (JMP 2026). Following this, linear regression was run to provide insight on the research question. As the y variable here is numeric, the same linear regression model and method was used as above to obtain a summary and test the predictive power of the model.
+```{R plots33, echo=FALSE, warning=FALSE, messages=FALSE}
+summary(model6)
+ggplot(difference.data5,aes(x=difference.values5,col=difference.values5))+geom_histogram(bins = 150)+labs(title="Difference between Actual and Predicted Values",subtitle="Percentage of Population Using Safe Drinking Water and With Hand-Washing Facilities")+xlab("Difference Value")+scale_colour_viridis_c()
+```
+
+The model highlights a statistically significant relationship, with the equation of the percentage of population having a hand washing facility as $$ Y= 18.727+0.87(percentage.of.population.using.safe.drinking.water)$$ For example, if safe drinking water percentage is  60%, hand-washing facility percentage would be 70.74. 
+
+Additionally, the difference between actual and predicted values tends to be clustered around 40. However, a higher amount of values have a smaller difference (between 0 and 20), suggesting that this model is closer to predicting actual values than the model used in research question two.
+
+This analysis examined the percentage of population using safe drinking water and a hand-washing facility, building on Assessment 1 by adding new research questions and using linear regression. Generally, the percentages of population using safe drinking water and hand-washing tended to be lower across rural areas than in urban areas. Linear regression also represented this, however predicted models differed widely from actual values. In contrast, the model used to predict the percentage of population using a hand-wash facility was more accurate, with predicted values being much closer to actual amounts.
+
+
+
+
+### References 
+
+* Jeon T (2018), Merging Datasets in R, Data Camp, accessed 14 February 2026,https://www.datacamp.com/tutorial/merging-datasets-r
+
+* R Markdown from R Studio(nd), Markdown Basics, R Markdown from R Studio, accessed 14 February 2026, https://rmarkdown.rstudio.com/authoring_basics.html 
+
+* World Health Organisation (2026), Proportion of population using safely managed drinking-water services (%),data.who.int, accessed 23 January 2026, https://data.who.int/indicators/i/5131A52/1548EA3 
+
+* World Health Organization (2026),  Proportion of population using a hand-washing facility with soap and water [Indicator],data.who.int, accessed 5 February 2026,https://data.who.int/indicators/i/21B89A9/D1223E8 
+
+
+* WHO/UNICEF Joint Monitoring Programme (JMP), About the JMP, WHO UNICEF JMP,accessed 15 February 2026,https://washdata.org/how-we-work/about-jmp 
+
+Generative AI has not been used in this assignment.
