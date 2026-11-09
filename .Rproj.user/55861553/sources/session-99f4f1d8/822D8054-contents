@@ -58,9 +58,15 @@ The summary statistics above highlight that the fruit group of Apples,Oranges an
 ```{r pressure, echo=FALSE}
 
 ggplot(data=data4,aes(x=Apples_Bananas_Oranges,y=Citrus_Fruits,color=Group))+geom_point(size=2)+theme_minimal()+labs(title="Relationship between Apples,Bananas and Oranges and Citrus Fruits")
+ggplot(data=data4,aes(x=Other.fruits,y=Citrus_Fruits,color=Group))+geom_point(size=2)+theme_minimal()+labs(title="Relationship between Other Fruits and Citrus Fruits")
+
 ```
 
-The plot above highlights a relatively strong positive relationship between Apples,Bananas, Oranges and Citrus Fruits, with North America having the highest amount of both fruit groups. *Most geographic groups had a proportionate amount of both fruit groups, with the exception of Africa (who had higher levels of citrus fruit) and Oceania (who had higher levels of Apples, Bananas and Oranges)* 
+The first plot above highlights a relatively strong positive relationship between Apples,Bananas, Oranges and Citrus Fruits, with North America having the highest amount of both fruit groups. *Most geographic groups had a proportionate amount of both fruit groups, with the exception of Africa (who had higher levels of citrus fruit) and Oceania (who had higher levels of Apples, Bananas and Oranges)* 
+
+The next plot highlights a similar positive trend between Other fruits and citrus fruits, however data points are more clustered together along the slope line and more geographic groups displayed a linear trend as opposed to a cluster shape. As with the previous plot, North America had the highest levels of citrus fruit; however Oceania had the highest consumption of other fruit globally. Upper middle income countries had the highest consumption of other fruits, whilst high income countries were similar to lower-middle income countries. 
+
+Given that other fruit includes berries, stone fruits and tropical fruits (Our World in Data, ), local climates are expected to have a major influence in determining which more 'niche' fruits are grown and therefore consumed. 
 
 ### Conclusion
 
