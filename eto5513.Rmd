@@ -41,7 +41,7 @@ For the purpose of this analysis, two new groups of fruits were created (Citrus 
 `The raw data contained 561 observations with 14 variables, and the final dataset that will be used for analysis contains 510 observations, across 5 variables, as the 'World' group was removed.`
 
 ```{r code, echo=FALSE}
-knitr::include_graphics("Screenshot 2026-11-08 155519.png")
+knitr::include_graphics("Code.png")
 str(data4)
 ```
 
